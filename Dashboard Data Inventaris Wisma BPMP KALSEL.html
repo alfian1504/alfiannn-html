@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Data Inventaris Wisma BPMP KALSEL</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f8fb;--card:#fff;--tx:#1b2a41;--mut:#64748b;--bd:#e2e8f0;--pri:#1e4d8c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--card:#1e293b;--tx:#e8eef7;--mut:#94a3b8;--bd:#334155;--pri:#7fb2f0}}
+:root[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--tx:#e8eef7;--mut:#94a3b8;--bd:#334155;--pri:#7fb2f0}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px}
+.wrap{max-width:1200px;margin:0 auto}
+h1{margin:0;text-align:center;color:var(--pri);font-size:1.7rem}
+.sub{text-align:center;color:var(--mut);margin:4px 0 18px;font-size:.9rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:18px}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border:2px solid var(--bd);border-radius:999px;background:var(--card);cursor:pointer;font-weight:600;font-size:.9rem;user-select:none}
+.chip input{display:none}.chip .dot{width:14px;height:14px;border-radius:4px;border:2px solid var(--c);background:transparent}
+.chip.on{border-color:var(--c)}.chip.on .dot{background:var(--c)}
+.chip.all{--c:var(--pri)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;text-align:center}
+.kpi b{display:block;font-size:1.8rem}.kpi span{font-size:.78rem;color:var(--mut);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.card h2{margin:0 0 8px;font-size:.95rem;text-align:center;color:var(--pri)}
+.cv{position:relative;height:280px}
+.wide{grid-column:1/-1}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:7px 10px;border-bottom:1px solid var(--bd);text-align:right}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
+.bad{color:#e5334b;font-weight:700}
+</style></head><body><div class="wrap">
+<h1>Dashboard Data Inventaris Wisma BPMP KALSEL</h1>
+<div class="sub">Laporan Analisis Fasilitas &amp; Kerusakan Barang 5 Wisma — pilih satu atau beberapa wisma</div>
+<div class="chips" id="chips"></div>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+ <div class="card"><h2>Total Fasilitas per Wisma (Keseluruhan)</h2><div class="cv"><canvas id="c1"></canvas></div></div>
+ <div class="card"><h2 id="t2">Komposisi Fasilitas</h2><div class="cv"><canvas id="c2"></canvas></div></div>
+ <div class="card"><h2 id="t3">Kondisi Fasilitas</h2><div class="cv"><canvas id="c3"></canvas></div></div>
+</div>
+<div class="grid">
+ <div class="card"><h2>Perbandingan Total Fasilitas &amp; Kerusakan</h2><div class="cv"><canvas id="c4"></canvas></div></div>
+ <div class="card"><h2 id="t5">Jumlah Kerusakan per Jenis Barang</h2><div class="cv"><canvas id="c5"></canvas></div></div>
+ <div class="card wide"><h2 id="t6">Detail Fasilitas</h2><div class="scroll"><table id="tb"></table></div></div>
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const D={"Melati":[["Lampu",43,7],["Kasur",30,2],["Meja",12,3],["Kursi",18,0],["Cermin",9,0],["AC",10,0],["Jemuran Baju",5,0],["Tempat Sampah",10,7],["Kipas Angin",4,3],["Lemari",25,2]],"Mawar":[["Lampu",89,18],["Kasur",56,1],["Meja",20,0],["Kursi",39,0],["Cermin",20,0],["AC",19,0],["Jemuran Baju",19,0],["Tempat Sampah",20,0],["Kipas Angin",1,0],["Lemari",53,0]],"Sakura":[["Lampu",43,9],["Kasur",30,0],["Meja",2,0],["Kursi",3,0],["Cermin",10,0],["AC",10,0],["Jemuran Baju",8,0],["Tempat Sampah",9,5],["Kipas Angin",10,5],["Lemari",28,3],["TV",1,0],["Dispenser & Galon",1,0],["Bingkai Foto",1,0]],"Kenanga":[["Lampu",64,17],["Kasur",30,0],["Meja",20,0],["Kursi",31,0],["Cermin",15,0],["AC",15,0],["Jemuran Baju",15,0],["Tempat Sampah",15,0],["Lemari",30,0],["Dispenser & Galon",2,1]],"Cempaka":[["Lampu",14,6],["Kasur",28,0],["Meja",30,1],["Kursi",43,8],["Cermin",26,2],["AC",14,7],["Jemuran Baju",13,0],["Tempat Sampah",10,0],["Lemari",26,0],["TV",1,0],["Dispenser & Galon",1,0]]};
+const W=Object.keys(D),COL={Melati:"#4cc9f0",Mawar:"#1e4d8c",Sakura:"#a5e3f5",Kenanga:"#2f80ed",Cempaka:"#00b4d8"};
+const TYPE=["#2f80ed","#4cc9f0","#1e4d8c","#00b4d8","#7c5cff","#f59e0b","#10b981","#e5334b","#94a3b8","#f472b6","#84cc16","#fb923c","#14b8a6"];
+let sel=new Set(W);const ch={};
+const sum=(w,i)=>D[w].reduce((a,r)=>a+r[i],0);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function chips(){const el=document.getElementById('chips');
+ el.innerHTML='';
+ const mk=(label,c,on,fn,cls='')=>{const l=document.createElement('label');l.className='chip '+cls+(on?' on':'');l.style.setProperty('--c',c);
+  l.innerHTML='<input type="checkbox"'+(on?' checked':'')+'><span class="dot"></span>'+label;l.onclick=e=>{e.preventDefault();fn()};el.appendChild(l)};
+ mk('Semua Wisma','var(--pri)',sel.size===W.length,()=>{sel=new Set(W);upd()},'all');
+ W.forEach(w=>mk('Wisma '+w,COL[w],sel.has(w),()=>{if(sel.size===W.length)sel=new Set([w]);else{sel.has(w)?sel.delete(w):sel.add(w);if(!sel.size)sel=new Set(W)}upd()}));}
+function agg(){const m={};[...sel].forEach(w=>D[w].forEach(([n,t,r])=>{m[n]=m[n]||[0,0];m[n][0]+=t;m[n][1]+=r}));return Object.entries(m).sort((a,b)=>b[1][0]-a[1][0])}
+function draw(id,cfg){if(ch[id]){ch[id].destroy()}
+ Chart.defaults.color=css('--mut');Chart.defaults.borderColor=css('--bd');
+ cfg.options=Object.assign({responsive:true,maintainAspectRatio:false},cfg.options);ch[id]=new Chart(document.getElementById(id),cfg)}
+Chart.register({id:'lbl',afterDatasetsDraw(c){if(c.config.type!=='doughnut')return;const d=c.data.datasets[0].data,t=d.reduce((a,b)=>a+b,0),x=c.ctx;c.getDatasetMeta(0).data.forEach((a,i)=>{const f=d[i]/t;if(f<0.04)return;const p=a.tooltipPosition();x.save();x.textAlign='center';x.font='700 12px system-ui,sans-serif';x.lineWidth=3;x.strokeStyle='rgba(0,0,0,.5)';x.fillStyle='#fff';const s=d[i],q='('+(f*100).toFixed(1)+'%)';x.strokeText(s,p.x,p.y-1);x.fillText(s,p.x,p.y-1);x.font='600 10px system-ui,sans-serif';x.strokeText(q,p.x,p.y+11);x.fillText(q,p.x,p.y+11);x.restore()})}});
+const pie={plugins:{legend:{position:'right',labels:{boxWidth:12}}},cutout:'50%'};
+function upd(){chips();const S=[...sel],A=agg();
+ const tot=S.reduce((a,w)=>a+sum(w,1),0),bad=S.reduce((a,w)=>a+sum(w,2),0);
+ const label=S.length===W.length?'Semua Wisma':S.map(w=>'Wisma '+w).join(', ');
+ document.getElementById('kpis').innerHTML=[['Total Fasilitas',tot,'#2f80ed'],['Kondisi Baik',tot-bad,'#0e9488'],['Total Kerusakan',bad,'#e5334b'],['% Kerusakan',(bad/tot*100).toFixed(2)+'%','#f59e0b'],['Jumlah Wisma',S.length,'var(--pri)']].map(k=>`<div class="kpi"><b style="color:${k[2]}">${k[1]}</b><span>${k[0]}</span></div>`).join('');
+ ['t2','t3','t5','t6'].forEach((id,i)=>document.getElementById(id).textContent=['Komposisi Fasilitas — ','Kondisi Fasilitas — ','Kerusakan per Jenis Barang — ','Detail Fasilitas — '][i]+label);
+ draw('c1',{type:'doughnut',data:{labels:W.map(w=>'Wisma '+w+' ('+sum(w,1)+')'),datasets:[{data:W.map(w=>sum(w,1)),backgroundColor:W.map(w=>COL[w]),borderWidth:2,borderColor:css('--card'),offset:W.map(w=>sel.has(w)&&sel.size<W.length?14:0)}]},options:pie});
+ draw('c2',{type:'doughnut',data:{labels:A.map(a=>a[0]+' ('+a[1][0]+')'),datasets:[{data:A.map(a=>a[1][0]),backgroundColor:TYPE,borderWidth:2,borderColor:css('--card')}]},options:pie});
+ draw('c3',{type:'doughnut',data:{labels:['Baik ('+(tot-bad)+')','Rusak ('+bad+')'],datasets:[{data:[tot-bad,bad],backgroundColor:['#10b981','#e5334b'],borderWidth:2,borderColor:css('--card')}]},options:pie});
+ draw('c4',{type:'bar',data:{labels:W,datasets:[{label:'Total Fasilitas',data:W.map(w=>sum(w,1)),backgroundColor:W.map(w=>sel.has(w)?'#2f80ed':'#2f80ed44')},{label:'Jumlah Rusak',data:W.map(w=>sum(w,2)),backgroundColor:W.map(w=>sel.has(w)?'#e5334b':'#e5334b44')}]},options:{plugins:{legend:{labels:{boxWidth:12}}}}});
+ const B=A.filter(a=>a[1][1]>0).sort((a,b)=>b[1][1]-a[1][1]);
+ draw('c5',{type:'bar',data:{labels:B.map(a=>a[0]),datasets:[{label:'Rusak',data:B.map(a=>a[1][1]),backgroundColor:'#00b4d8'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+ document.getElementById('tb').innerHTML='<tr><th>Jenis Fasilitas</th><th>Jumlah</th><th>Rusak</th><th>Baik</th><th>% Rusak</th></tr>'+A.map(([n,[t,r]])=>`<tr><td>${n}</td><td>${t}</td><td class="${r?'bad':''}">${r}</td><td>${t-r}</td><td>${(r/t*100).toFixed(1)}%</td></tr>`).join('');
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>setTimeout(upd,50));
+upd();
+</script></body></html>
